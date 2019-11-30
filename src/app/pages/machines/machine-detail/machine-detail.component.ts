@@ -14,7 +14,7 @@ export class MachineDetailComponent implements OnInit {
   token: any;
   rawMaterial: any;
 
-  supplierLeadDeliveryTime: any;
+  supplierAverageLeadTime: any;
 
   // skipping model definitions, for POC purposes
 
@@ -42,14 +42,13 @@ export class MachineDetailComponent implements OnInit {
   newOrderDescription: any;
   newOrderQuantity: number;
 
+
   // Input
   safeDaysLeft: number;
 
   // Calculated Data
   calculatedDaysLeft: number;
   newOrderSuggestedTime: Date;
-
-
 
   constructor(
     private http: HttpClient,
@@ -66,6 +65,8 @@ export class MachineDetailComponent implements OnInit {
 
   initialise() {
     this.safeDaysLeft = 150;
+    this.supplierAverageLeadTime = 34;
+
     this.machineQuantityLeft = -1;
 
     this.inventoryQuantityLeft = -1;
@@ -80,10 +81,9 @@ export class MachineDetailComponent implements OnInit {
     this.newOrderId = null;
     this.newOrderDaysLeft = 0;
     this.newOrderDescription = null;
-    this.newOrderQuantity = this.safeDaysLeft;
-    this.newOrderSupplier = null;
+    this.newOrderQuantity = 12000;
 
-    this.supplierLeadDeliveryTime = null;
+    this.newOrderSupplier = null;
 
     this.machineDaysLeft = 0;
     this.calculatedDaysLeft = 0;
@@ -102,16 +102,17 @@ export class MachineDetailComponent implements OnInit {
     this.machineDaysLeft = this.calculateDaysFromQuantity(this.machineQuantityLeft);
     this.inventoryDaysLeft = this.calculateDaysFromQuantity(this.inventoryQuantityLeft);
     this.expectedOrderDaysLeft = this.calculateDaysFromQuantity(this.expectedOrderQuantityLeft);
+    this.newOrderDaysLeft = this.calculateDaysFromQuantity(this.newOrderQuantity);
 
     this.calculatedDaysLeft = this.inventoryDaysLeft +
                               this.machineDaysLeft +
                               this.expectedOrderDaysLeft +
                               this.newOrderDaysLeft;
     const d = new Date();
-    d.setDate(d.getDate() + this.calculatedDaysLeft - 1 - this.supplierLeadDeliveryTime);
+    d.setDate(d.getDate() + this.calculatedDaysLeft - 1 - this.supplierAverageLeadTime);
     this.newOrderSuggestedTime = d;
 
-    this.newOrderQuantity = this.safeDaysLeft - this.calculatedDaysLeft;
+
     this.newOrderDescription =  'Nylon ' + this.newOrderQuantity + 'm';
   }
 
@@ -119,10 +120,6 @@ export class MachineDetailComponent implements OnInit {
     const parameter = 1 / 4 ;
     const speed = 100;
     return Math.round(quantity / (parameter * speed * 24));
-  }
-
-  calculateSupplierLeadTime(supplier: string) {
-    this.supplierLeadDeliveryTime = 34;
   }
 
   getInventory() {
@@ -150,7 +147,6 @@ export class MachineDetailComponent implements OnInit {
       this.expectedOrderSupplier = this.expectedOrder.participants[0].company.name;
       this.expectedOrderQuantityLeft = 12000;  // TODO: get from description
       this.calculate();
-      this.calculateSupplierLeadTime(this.expectedOrderSupplier);
     });
   }
 
@@ -175,7 +171,6 @@ export class MachineDetailComponent implements OnInit {
       this.newOrder = data;
       this.newOrderSupplier = this.newOrder.participants[0].company.name;
       this.newOrderId = this.newOrder.id;
-      this.newOrderDaysLeft = 50;
       this.calculate();
     });
   }

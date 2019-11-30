@@ -24,8 +24,8 @@
             <button type="submit" (click)="getExpectedOrder()" nbButton status="danger" size="small">Feed From Orderstate</button>
           </div>
           <div class="form-group row">
-            <label class="label col-sm-3 form-control-label">Supplier Lead Delivery Time</label>
-            <div class="col-sm-9"> {{supplierLeadDeliveryTime}} </div>
+            <label class="label col-sm-3 form-control-label">Supplier Average Lead Time</label>
+            <div class="col-sm-9"> {{supplierAverageLeadTime}} </div>
           </div>
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Suggested Order Time</label>
@@ -33,6 +33,7 @@
           </div>
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Suggested New Order Quantity</label>
+<!--            <input type="text" class="col-sm-9" [(ngModel)]="newOrderQuantity"/>-->
             <div class="col-sm-9"> {{newOrderQuantity}} </div>
           </div>
           <div class="form-group row">
