@@ -10,57 +10,83 @@ import {DomSanitizer} from '@angular/platform-browser';
 })
 export class MachineDetailComponent implements OnInit {
 
-  rawMaterial: any;
-  remainingQuantity: number;
-  remainingDaysLeft: number;
-  inventory: number;
-  expectedDelivery: any;
-  usualExpectedDelivery: Date;
-  suggesterOrderTime: Date;
-  testData: any;
-  // skip authentication for the POC
+  // Constants
   token: any;
-  existingOrderId: any;
-  existingOrder: any;
-  newOrderResult: any;
-  newOrderResultId: any;
+  rawMaterial: any;
+
+  supplierLeadDeliveryTime: any;
+
+  // skipping model definitions, for POC purposes
+
+  // Machine Data
+  machineQuantityLeft: number;
+  machineDaysLeft: number;
+
+  // Inventory Data
+  inventoryQuantityLeft: number;
   inventoryDaysLeft: number;
-  calculatedDaysLeft: number;
-  expectedDaysLeft: number;
+
+  // Expected Order Data
+  expectedOrder: any;
+  expectedOrderSupplier: any;
+  expectedOrderId: any;
+  expectedOrderDeliveryDate: any;
+  expectedOrderQuantityLeft: number;
+  expectedOrderDaysLeft: number;
+
+  // New Order Data
+  newOrder: any;
+  newOrderSupplier: any;
+  newOrderId: any;
   newOrderDaysLeft: number;
   newOrderDescription: any;
   newOrderQuantity: number;
+
+  // Input
   safeDaysLeft: number;
+
+  // Calculated Data
+  calculatedDaysLeft: number;
+  newOrderSuggestedTime: Date;
+
+
 
   constructor(
     private http: HttpClient,
     private sanitizer: DomSanitizer) {
-    this.initialise();
+      this.rawMaterial = 'Nylon';
+      // skipping OAuth2 authentication Flow, for POC purposes
+      this.token = '';
+      this.expectedOrderId = '5de2d2146910fc0004f61e60';
+      this.initialise();
   }
 
   ngOnInit() {
   }
 
   initialise() {
-    this.rawMaterial = 'Plastic';
-    this.token = '2f3a7198-6c36-4d44-8288-9cd52c32d0f8';
-    this.existingOrderId = '5dcb599a7569880004aee087';
     this.safeDaysLeft = 150;
-    this.remainingQuantity = -1;
-    this.inventory = -1;
-    this.expectedDelivery = null;
-    this.usualExpectedDelivery = null;
-    this.suggesterOrderTime = null;
-    this.testData = null;
-    this.newOrderResult = null;
-    this.newOrderResultId = null;
+    this.machineQuantityLeft = -1;
+
+    this.inventoryQuantityLeft = -1;
     this.inventoryDaysLeft = 0;
-    this.remainingDaysLeft = 0;
-    this.expectedDaysLeft = 0;
+
+    this.expectedOrderDeliveryDate = null;
+    this.expectedOrderQuantityLeft = -1;
+    this.expectedOrderDaysLeft = 0;
+
+    this.newOrderSuggestedTime = null;
+    this.newOrder = null;
+    this.newOrderId = null;
     this.newOrderDaysLeft = 0;
-    this.calculatedDaysLeft = 0;
     this.newOrderDescription = null;
     this.newOrderQuantity = this.safeDaysLeft;
+    this.newOrderSupplier = null;
+
+    this.supplierLeadDeliveryTime = null;
+
+    this.machineDaysLeft = 0;
+    this.calculatedDaysLeft = 0;
   }
 
   // Skip create decoupled service for all the below methods, for POC fast implementation.
@@ -68,16 +94,23 @@ export class MachineDetailComponent implements OnInit {
   //  Connection to Inventory Machine System API
   //  Mocking the return value assignment
   getRemainingQuantity() {
-    this.remainingQuantity = 100;
-    this.remainingDaysLeft = 13;
+    this.machineQuantityLeft = 600;
     this.calculate();
   }
 
   calculate() {
+    this.machineDaysLeft = this.calculateDaysFromQuantity(this.machineQuantityLeft);
+    this.inventoryDaysLeft = this.calculateDaysFromQuantity(this.inventoryQuantityLeft);
+    this.expectedOrderDaysLeft = this.calculateDaysFromQuantity(this.expectedOrderQuantityLeft);
+
     this.calculatedDaysLeft = this.inventoryDaysLeft +
-                              this.remainingDaysLeft +
-                              this.expectedDaysLeft +
+                              this.machineDaysLeft +
+                              this.expectedOrderDaysLeft +
                               this.newOrderDaysLeft;
+    const d = new Date();
+    d.setDate(d.getDate() + this.calculatedDaysLeft - 1 - this.supplierLeadDeliveryTime);
+    this.newOrderSuggestedTime = d;
+
     this.newOrderQuantity = this.safeDaysLeft - this.calculatedDaysLeft;
     this.newOrderDescription =  'Nylon ' + this.newOrderQuantity + 'm';
   }
@@ -85,18 +118,21 @@ export class MachineDetailComponent implements OnInit {
   calculateDaysFromQuantity(quantity: number) {
     const parameter = 1 / 4 ;
     const speed = 100;
-    return quantity / (parameter * speed * 24);
+    return Math.round(quantity / (parameter * speed * 24));
+  }
+
+  calculateSupplierLeadTime(supplier: string) {
+    this.supplierLeadDeliveryTime = 34;
   }
 
   getInventory() {
     //  Connection to Inventory System API
-    this.inventory = 300;
-    this.inventoryDaysLeft = 10;
+    this.inventoryQuantityLeft = 9000;
     this.calculate();
   }
 
   //  Connection to Orderstate API
-  getOrder() {
+  getExpectedOrder() {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json;charset=UTF-8',
@@ -104,16 +140,21 @@ export class MachineDetailComponent implements OnInit {
       }),
     };
 
-    const localUrl = 'https://orderstate-test.herokuapp.com/api/orders' + '/' + this.existingOrderId;
+    const localUrl = 'https://orderstate-test.herokuapp.com/api/orders' + '/' + this.expectedOrderId;
 
     this.http.get(localUrl, httpOptions).subscribe(data => {
       // normally checking the relevant milestone
-      this.expectedDelivery = (data as any).mileStones[2].expectedAt;
-      this.existingOrder = data;
-      this.expectedDaysLeft = 32;
+      const milestoneDeliveryIndex = (data as any).mileStones.length - 1;
+      this.expectedOrderDeliveryDate = (data as any).mileStones[milestoneDeliveryIndex].expectedAt;
+      this.expectedOrder = data;
+      this.expectedOrderSupplier = this.expectedOrder.participants[0].company.name;
+      this.expectedOrderQuantityLeft = 12000;  // TODO: get from description
       this.calculate();
+      this.calculateSupplierLeadTime(this.expectedOrderSupplier);
     });
   }
+
+
 
   createOrder() {
 
@@ -131,13 +172,13 @@ export class MachineDetailComponent implements OnInit {
     const localUrl = 'https://orderstate-test.herokuapp.com/api/orders';
 
     this.http.post(localUrl, newOrder, httpOptions).subscribe(data => {
-      this.newOrderResult = data;
-      this.newOrderResultId = this.newOrderResult.id;
+      this.newOrder = data;
+      this.newOrderSupplier = this.newOrder.participants[0].company.name;
+      this.newOrderId = this.newOrder.id;
       this.newOrderDaysLeft = 50;
       this.calculate();
     });
   }
-
 
   sanitize(url: string) {
     return this.sanitizer.bypassSecurityTrustUrl(url);

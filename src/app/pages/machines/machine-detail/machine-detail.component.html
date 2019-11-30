@@ -9,31 +9,27 @@
             <div class="col-sm-9"> {{rawMaterial}} </div>
           </div>
           <div class="form-group row">
-            <label class="label col-sm-3 form-control-label">Raw Material Remaining Quantity</label>
-            <div class="col-sm-3"> <a *ngIf="remainingQuantity>-1">{{remainingQuantity}} </a> </div>
-            <button type="submit" (click)="getRemainingQuantity()" nbButton status="warning">Get From Machine</button>
+            <label class="label col-sm-3 form-control-label">Machine Remaining Quantity (m)</label>
+            <div class="col-sm-3"> <a *ngIf="machineQuantityLeft>-1">{{machineQuantityLeft}} </a> </div>
+            <button type="submit" (click)="getRemainingQuantity()" nbButton status="warning" size="small">Feed From Machine</button>
           </div>
           <div class="form-group row">
-            <label class="label col-sm-3 form-control-label">Inventory</label>
-            <div class="col-sm-3"> <a *ngIf="inventory>-1"> {{inventory}}</a> </div>
-            <button type="submit" (click)="getInventory()" nbButton status="warning">Get From Inventory</button>
+            <label class="label col-sm-3 form-control-label">Inventory Remaining Quantity (m)</label>
+            <div class="col-sm-3"> <a *ngIf="inventoryQuantityLeft>-1"> {{inventoryQuantityLeft}}</a> </div>
+            <button type="submit" (click)="getInventory()" nbButton status="warning" size="small">Feed From Inventory</button>
           </div>
           <div class="form-group row">
-            <label class="label col-sm-3 form-control-label">Expected Delivery</label>
-            <div class="col-sm-3"> {{expectedDelivery | date:'dd/MM/yy'}} </div>
-            <button type="submit" (click)="getOrder()" nbButton status="warning">Get From Orderstate</button>
+            <label class="label col-sm-3 form-control-label">Expected Order Delivery Date</label>
+            <div class="col-sm-3"> {{expectedOrderDeliveryDate | date:'dd/MM/yy'}} </div>
+            <button type="submit" (click)="getExpectedOrder()" nbButton status="danger" size="small">Feed From Orderstate</button>
           </div>
           <div class="form-group row">
-            <label class="label col-sm-3 form-control-label">Usual Expected Delivery</label>
-            <div class="col-sm-9"> {{usualExpectedDelivery| date:'dd/MM/yy'}} </div>
-          </div>
-          <div class="form-group row">
-            <label class="label col-sm-3 form-control-label">Suggested Order Time</label>
-            <div class="col-sm-9"> {{suggesterOrderTime| date:'dd/MM/yy'}} </div>
+            <label class="label col-sm-3 form-control-label">Supplier Lead Delivery Time</label>
+            <div class="col-sm-9"> {{supplierLeadDeliveryTime}} </div>
           </div>
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Suggested Order Time</label>
-            <div class="col-sm-9"> {{testData}} </div>
+            <div class="col-sm-9"> {{newOrderSuggestedTime| date:'dd/MM/yy'}} </div>
           </div>
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Suggested New Order Quantity</label>
@@ -57,94 +53,94 @@
   </div>
 
 <div class="row">
-  <div *ngIf="remainingQuantity>-1" class="col-md-3">
-    <nb-card>
+  <div *ngIf="machineQuantityLeft>-1" class="col-md-3">
+    <nb-card accent="warning">
       <nb-card-header>Machine Production Details</nb-card-header>
       <nb-card-body>
         <form class="form-horizontal">
           <div class="form-group row">
-            <label class="label col-sm-3 form-control-label">Raw Material Remaining Quantity</label>
-            <div class="col-sm-9">{{remainingQuantity}}</div>
+            <label class="label col-sm-3 form-control-label">Remaining Quantity (m)</label>
+            <div class="col-sm-9">{{machineQuantityLeft}}</div>
           </div>
         </form>
         <form class="form-horizontal">
           <div class="form-group row">
-            <label class="label col-sm-3 form-control-label">Days</label>
-            <div class="col-sm-9">{{remainingDaysLeft}}</div>
+            <label class="label col-sm-3 form-control-label">Calculated Days</label>
+            <div class="col-sm-9">{{machineDaysLeft}}</div>
           </div>
         </form>
       </nb-card-body>
     </nb-card>
   </div>
-  <div  *ngIf="inventory>-1" class="col-md-3">
-    <nb-card>
+  <div *ngIf="inventoryQuantityLeft>-1" class="col-md-3">
+    <nb-card accent="warning">
       <nb-card-header>Inventory Details</nb-card-header>
       <nb-card-body>
         <form class="form-horizontal">
           <div class="form-group row">
-            <label class="label col-sm-3 form-control-label">Plastic Stock Quantity</label>
-            <div class="col-sm-9">{{inventory}}</div>
+            <label class="label col-sm-3 form-control-label">Stock Quantity (m)</label>
+            <div class="col-sm-9">{{inventoryQuantityLeft}}</div>
           </div>
         </form>
         <form class="form-horizontal">
           <div class="form-group row">
-            <label class="label col-sm-3 form-control-label">Days</label>
+            <label class="label col-sm-3 form-control-label">Calculated Days</label>
             <div class="col-sm-9">{{inventoryDaysLeft}}</div>
           </div>
         </form>
       </nb-card-body>
     </nb-card>
   </div>
-  <div *ngIf="expectedDelivery" class="col-md-3">
-    <nb-card>
+  <div *ngIf="expectedOrderDeliveryDate" class="col-md-3">
+    <nb-card accent="danger">
       <nb-card-header>Expected Order Details</nb-card-header>
       <nb-card-body>
         <form class="form-horizontal">
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Id</label>
-            <div class="col-sm-9"> <a [href]="sanitize('https://orderstate-test.herokuapp.com/#/order/' + existingOrderId) " target="_blank">{{substring(existingOrderId)}}</a> </div>
+            <div class="col-sm-9"> <a [href]="sanitize('https://orderstate-test.herokuapp.com/#/order/' + expectedOrderId) " target="_blank">{{substring(expectedOrderId)}}</a> </div>
           </div>
         </form>
         <form class="form-horizontal">
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Description</label>
-            <div class="col-sm-9">{{existingOrder.description}}</div>
+            <div class="col-sm-9">{{expectedOrder.description}}</div>
           </div>
         </form>
         <form class="form-horizontal">
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Supplier</label>
-            <div class="col-sm-9">{{existingOrder.participants[1].company.name}}</div>
+            <div class="col-sm-9">{{expectedOrderSupplier}}</div>
           </div>
         </form>
         <form class="form-horizontal">
           <div class="form-group row">
-            <label class="label col-sm-3 form-control-label">Days</label>
-            <div class="col-sm-9">{{expectedDaysLeft}}</div>
+            <label class="label col-sm-3 form-control-label">Calculated Days</label>
+            <div class="col-sm-9">{{expectedOrderDaysLeft}}</div>
           </div>
         </form>
       </nb-card-body>
     </nb-card>
   </div>
-  <div *ngIf="newOrderResultId" class="col-md-3">
-    <nb-card  accent="warning" >
+  <div *ngIf="newOrderId" class="col-md-3">
+    <nb-card  accent="success" >
       <nb-card-header>New Order Details</nb-card-header>
       <nb-card-body>
         <form class="form-horizontal">
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Id</label>
-            <div class="col-sm-9"> <a [href]="sanitize('https://orderstate-test.herokuapp.com/#/order/' + newOrderResult.id)">{{substring(newOrderResult.id)}}</a> </div>
+            <div class="col-sm-9"> <a [href]="sanitize('https://orderstate-test.herokuapp.com/#/order/' + newOrder.id)">{{substring(newOrder.id)}}</a> </div>
           </div>
         </form>
         <form class="form-horizontal">
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Supplier</label>
-            <div class="col-sm-9">{{newOrderResult.participants[0].company.name}}</div>
+            <div class="col-sm-9">{{newOrderSupplier}}</div>
           </div>
         </form>
         <form class="form-horizontal">
           <div class="form-group row">
-            <label class="label col-sm-3 form-control-label">Days</label>
+            <label class="label col-sm-3 form-control-label">Calculated Days</label>
             <div class="col-sm-9">{{newOrderDaysLeft}}</div>
           </div>
         </form>
