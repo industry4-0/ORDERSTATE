@@ -1,7 +1,8 @@
 <div class="row">
-  <div class="col-md-9">
+  <div class="col-md-8">
     <nb-card accent="info">
-      <nb-card-header>Machine One <button nbButton status="basic" (click)="initialise()" size="tiny">refresh</button> </nb-card-header>
+      <nb-card-header>Machine One <button nbButton status="basic" (click)="initialise()" size="tiny">refresh</button>
+      </nb-card-header>
       <nb-card-body>
         <form class="form-horizontal">
           <div class="form-group row">
@@ -11,17 +12,20 @@
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Machine Remaining Quantity (m)</label>
             <div class="col-sm-3"> <a *ngIf="machineQuantityLeft>-1">{{machineQuantityLeft}} </a> </div>
-            <button type="submit" (click)="getRemainingQuantity()" nbButton status="warning" size="small">Feed From Machine</button>
+            <button type="submit" (click)="getRemainingQuantity()" nbButton status="info" size="small">Feed From
+              Machine</button>
           </div>
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Inventory Remaining Quantity (m)</label>
             <div class="col-sm-3"> <a *ngIf="inventoryQuantityLeft>-1"> {{inventoryQuantityLeft}}</a> </div>
-            <button type="submit" (click)="getInventory()" nbButton status="warning" size="small">Feed From Inventory</button>
+            <button type="submit" (click)="getInventory()" nbButton status="warning" size="small">Feed From
+              Inventory</button>
           </div>
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Expected Order Delivery Date</label>
             <div class="col-sm-3"> {{expectedOrderDeliveryDate | date:'dd/MM/yy'}} </div>
-            <button type="submit" (click)="getExpectedOrder()" nbButton status="danger" size="small">Feed From Orderstate</button>
+            <button type="submit" (click)="getExpectedOrder()" nbButton status="danger" size="small">Feed From
+              Orderstate</button>
           </div>
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Supplier Average Lead Time</label>
@@ -33,8 +37,8 @@
           </div>
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Suggested New Order Quantity</label>
-<!--            <input type="text" class="col-sm-9" [(ngModel)]="newOrderQuantity"/>-->
-            <div class="col-sm-9"> {{newOrderQuantity}} </div>
+            <!--            <input type="text" class="col-sm-9" [(ngModel)]="newOrderQuantity"/>-->
+            <div class="col-sm-9"> {{newOrderSuggestedQuantity}} </div>
           </div>
           <div class="form-group row">
             <div class="offset-sm-3 col-sm-9">
@@ -45,17 +49,42 @@
       </nb-card-body>
     </nb-card>
   </div>
-  <br class="col-md-3">
-    <a *ngIf="calculatedDaysLeft>-1"> Remaining Days Left <b>{{calculatedDaysLeft}}</b></a>
-<!--    <a *ngIf="remainingDaysLeft>-1"> From Machine {{remainingDaysLeft}}</a>-->
-<!--    <a *ngIf="inventoryDaysLeft>-1"> From Inventory {{inventoryDaysLeft}}</a>-->
-<!--    <a *ngIf="expectedDaysLeft>-1"> From expected Order {{expectedDaysLeft}}</a>-->
-<!--    <a *ngIf="newOrderDaysLeft>-1"> From new Order {{newOrderDaysLeft}}</a>-->
+  <div *ngIf="machineQuantityLeft>0" class="col-md-4">
+    <nb-card>
+      <nb-card-header><b>{{calculatedDaysLeft}} Days Left</b></nb-card-header>
+      <nb-card-body>
+        <div echarts [options]="pieOptions" style="height: 234px;"></div>
+      </nb-card-body>
+      <table class="table mb-0">
+        <tr *ngIf="machineQuantityLeft>0">
+          <td><span [ngStyle]="{color:colors.info}">◉</span> Machine</td>
+          <td class="text-right">{{machineDaysLeft}}</td>
+        </tr>
+        <tr *ngIf="inventoryDaysLeft>0">
+          <td><span [ngStyle]="{color:colors.warning}">◉</span> Inventory</td>
+          <td class="text-right">{{inventoryDaysLeft}}</td>
+        </tr>
+        <tr *ngIf="expectedOrderDaysLeft>0">
+          <td><span [ngStyle]="{color:colors.dangerLight}">◉</span> Expected Order</td>
+          <td class="text-right">{{expectedOrderDaysLeft}}</td>
+        </tr>
+        <tr *ngIf="newOrderDaysLeft>0">
+          <td><span [ngStyle]="{color:colors.success}">◉</span> New Order</td>
+          <td class="text-right">{{newOrderDaysLeft}}</td>
+        </tr>
+      </table>
+    </nb-card>
   </div>
+  <!-- <a *ngIf="calculatedDaysLeft>-1"> Remaining Days Left <b>{{calculatedDaysLeft}}</b></a>
+  <a *ngIf="remainingDaysLeft>-1"> From Machine {{remainingDaysLeft}}</a>
+  <a *ngIf="inventoryDaysLeft>-1"> From Inventory {{inventoryDaysLeft}}</a>
+  <a *ngIf="expectedDaysLeft>-1"> From expected Order {{expectedDaysLeft}}</a>
+  <a *ngIf="newOrderDaysLeft>-1"> From new Order {{newOrderDaysLeft}}</a> -->
+</div>
 
 <div class="row">
   <div *ngIf="machineQuantityLeft>-1" class="col-md-3">
-    <nb-card accent="warning">
+    <nb-card accent="info">
       <nb-card-header>Machine Production Details</nb-card-header>
       <nb-card-body>
         <form class="form-horizontal">
@@ -99,7 +128,9 @@
         <form class="form-horizontal">
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Id</label>
-            <div class="col-sm-9"> <a [href]="sanitize('https://orderstate-test.herokuapp.com/#/order/' + expectedOrderId) " target="_blank">{{substring(expectedOrderId)}}</a> </div>
+            <div class="col-sm-9"> <a
+                [href]="sanitize('https://orderstate-test.herokuapp.com/#/order/' + expectedOrderId) "
+                target="_blank">{{substring(expectedOrderId)}}</a> </div>
           </div>
         </form>
         <form class="form-horizontal">
@@ -124,13 +155,15 @@
     </nb-card>
   </div>
   <div *ngIf="newOrderId" class="col-md-3">
-    <nb-card  accent="success" >
+    <nb-card accent="success">
       <nb-card-header>New Order Details</nb-card-header>
       <nb-card-body>
         <form class="form-horizontal">
           <div class="form-group row">
             <label class="label col-sm-3 form-control-label">Id</label>
-            <div class="col-sm-9"> <a [href]="sanitize('https://orderstate-test.herokuapp.com/#/order/' + newOrder.id)">{{substring(newOrder.id)}}</a> </div>
+            <div class="col-sm-9"> <a
+                [href]="sanitize('https://orderstate-test.herokuapp.com/#/order/' + newOrder.id)">{{substring(newOrder.id)}}</a>
+            </div>
           </div>
         </form>
         <form class="form-horizontal">
@@ -153,4 +186,3 @@
 <!--<div class="col-xxxl-3 col-xxl-4 col-lg-5 col-md-6">-->
 <!--  <ngx-solar [chartValue]="solarValue"></ngx-solar>-->
 <!--</div>-->
-

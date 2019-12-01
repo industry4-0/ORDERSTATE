@@ -16,6 +16,7 @@ import { MachinesRoutingModule } from './machines-routing.module';
 import { MachinesComponent } from './machines.component';
 import { MachineDetailComponent } from './machine-detail/machine-detail.component';
 import { FormsModule as ngFormsModule } from '@angular/forms';
+import { NgxEchartsModule } from 'ngx-echarts';
 
 @NgModule({
   imports: [
@@ -32,6 +33,7 @@ import { FormsModule as ngFormsModule } from '@angular/forms';
     NbSelectModule,
     NbIconModule,
     ngFormsModule,
+    NgxEchartsModule,
   ],
   declarations: [
     MachinesComponent,
